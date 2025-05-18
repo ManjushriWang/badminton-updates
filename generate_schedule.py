@@ -1,78 +1,85 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from datetime import date
-import time
+#!/usr/bin/env python3
+import requests
+from bs4 import BeautifulSoup
+from datetime import date, timedelta
 
-# 设置 Chrome 浏览器参数（静音无头）
-options = Options()
-options.add_argument("--headless")
-options.add_argument("--log-level=3")
-options.add_experimental_option("excludeSwitches", ["enable-logging"])
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=options)
+# ———————— 配置区域 ————————
+BASE_URL       = "https://sportandrec.auckland.ac.nz"
+SCHEDULE_URL   = BASE_URL + "/facility/GetSchedule"
+API_URL        = BASE_URL + "/Facility/GetScheduleCustomAppointments"
+FACILITY_LABEL = "Recreation Centre > Sports halls > Sports Hall 1"
+# ————————————————————————
 
-# 打开大学日历页面
-driver.get("https://sportandrec.auckland.ac.nz/facility/GetSchedule")
-try:
-    wait = WebDriverWait(driver, 15)
-    dropdown = wait.until(EC.presence_of_element_located((By.ID, "SelectedFacility")))
-    select = Select(dropdown)
-    select.select_by_visible_text("Recreation Centre > Sports halls > Sports Hall 1")
-    print("✅ Selected: Sport Hall 1")
-    time.sleep(5)
-except Exception as e:
-    print("❌ Dropdown selection failed:", e)
-    driver.quit()
-    exit()
+# 1️⃣ 解析 facilityId
+html = requests.get(SCHEDULE_URL).text
+soup = BeautifulSoup(html, "lxml")
+select = soup.find("select", id="SelectedFacility")
+if not select:
+    raise RuntimeError("❌ 找不到下拉菜单 <select id='SelectedFacility'>")
+facility_id = None
+for opt in select.find_all("option"):
+    if opt.text.strip() == FACILITY_LABEL:
+        facility_id = opt["value"]
+        break
+if not facility_id:
+    raise RuntimeError(f"❌ 未找到选项 “{FACILITY_LABEL}”")
 
-# 抓取 badminton 时段
-badminton_sessions = []
-try:
-    event_divs = driver.find_elements(By.CLASS_NAME, "fc-event")
-    for div in event_divs:
-        text = div.text.strip().replace('\n', ' | ')
-        if "Member Drop-In: Badminton" in text:
-            badminton_sessions.append(text)
-except Exception as e:
-    print("❌ Failed to extract events:", e)
-
-driver.quit()
-
-# 格式化输出为 Markdown 文件
+# 2️⃣ 计算本周的周日和下个周日
 today = date.today()
-filename = "schedule.md"
+days_since_sun = (today.weekday() + 1) % 7
+sunday = today - timedelta(days=days_since_sun)
+next_sunday = sunday + timedelta(days=7)
+start_ts = sunday.strftime("%Y-%m-%dT00:00:00")
+end_ts   = next_sunday.strftime("%Y-%m-%dT00:00:00")
 
-print("\n📢 Weekly Badminton Schedule:\n")
+# 3️⃣ 拉取 JSON 活动数据
+resp = requests.get(API_URL, params={
+    "selectedId": facility_id,
+    "start": start_ts,
+    "end":   end_ts,
+})
+resp.raise_for_status()
+events = resp.json()
 
-with open(filename, "w", encoding="utf-8") as f:
-    if not badminton_sessions:
-        msg = "⚠️ No badminton sessions found for this week.\n"
-        print(msg)
-        f.write(msg)
+# 4️⃣ 筛出 Badminton Drop-In
+badminton = [
+    e for e in events
+    if e.get("title","").startswith("Member Drop-In: Badminton")
+]
+
+# 5️⃣ 打印 & 写入 schedule.md
+week_range = f"{sunday:%b %d, %Y} – {(next_sunday - timedelta(days=1)):%b %d, %Y}"
+print(f"\n🎾 Weekly Badminton Schedule ({week_range}):\n")
+print(f"📍 Location: Sport Hall 1")
+print(f"📅 Week: {week_range}\n")
+
+if not badminton:
+    print("⚠️ 本周没有找到 Member Drop-In: Badminton 时段。\n")
+else:
+    for e in badminton:
+        dt_str, time_str = e["start"].split("T")
+        weekday = date.fromisoformat(dt_str).strftime("%A")
+        start_t = time_str[:5]
+        end_t   = e["end"].split("T")[1][:5]
+        print(f"- **{weekday}**: {start_t} – {end_t}")
+    print()
+
+# 🚨 新增提醒
+print("📣 别忘了带上你的学生卡（Student ID）才能入场喔！\n")
+
+# 写 markdown 文件
+with open("schedule.md","w",encoding="utf-8") as md:
+    md.write(f"# 🎾 Member Drop-In: Badminton Sessions\n")
+    md.write(f"**Week:** {week_range}\n\n")
+    if not badminton:
+        md.write("- ⚠️ 本周没有找到 Member Drop-In: Badminton 时段。\n")
     else:
-        header = f"# 🎾 This Week's Member Drop-In: Badminton Sessions\n"
-        subhead = f"📅 Date: {today.strftime('%B %d, %Y')}\n"
-        location = "📍 Location: Sport Hall 1\n\n"
-        times_header = "## 🗓️ Times:\n"
-        outro = "\n📣 Remember to bring your student ID to enter.\n"
+        for e in badminton:
+            dt_str, time_str = e["start"].split("T")
+            weekday = date.fromisoformat(dt_str).strftime("%A")
+            start_t = time_str[:5]
+            end_t   = e["end"].split("T")[1][:5]
+            md.write(f"- **{weekday}**: {start_t} – {end_t}\n")
+    md.write("\n📣 别忘了带上你的学生卡（Student ID）才能入场喔！\n")
 
-        # 打印并写入头部
-        print(header + subhead + location + times_header)
-        f.write(header + subhead + location + times_header)
-
-        # 写入每个时间段
-        for session in badminton_sessions:
-            time_line = f"- {session.split('|')[0].strip()}\n"
-            print(time_line.strip())
-            f.write(time_line)
-
-        # 打印结尾
-        print(outro.strip())
-        f.write(outro)
-
-print(f"\n✅ Schedule written to `{filename}`")
+print("✅ schedule.md 已生成！")
