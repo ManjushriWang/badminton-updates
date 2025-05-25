@@ -1,0 +1,29 @@
+name: Auto Run Badminton Schedule
+
+on:
+  schedule:
+    - cron: '8 4 * * 0'  # 每周日 NZT 16:08 = UTC 04:08
+  workflow_dispatch:     # 支持手动触发
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml
+      - name: Run schedule script
+        run: |
+          python generate_schedule.py
+      - name: Commit schedule.md
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add schedule.md
+          git commit -m 'Auto update schedule.md'
+          git push
