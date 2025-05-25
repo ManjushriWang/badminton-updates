@@ -1,25 +1,32 @@
+# .github/workflows/main.yml
 name: Auto Run Badminton Schedule
 
 on:
   schedule:
-      - cron: '*/5 * * * *'   # 每 5 分钟 触发一次
-  workflow_dispatch:       # 加上这行后，Actions 页面就有手动 Run 按钮了
+    - cron: ' /5 * * * '     # 每周日 NZT 16:10 = UTC 04:10（测试改成* /5 * * * *后恢复此行10 4 * * 0 ）
+  workflow_dispatch:        # 保留手动触发按钮
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
       - name: Install dependencies
         run: |
           pip install requests beautifulsoup4 lxml
+
       - name: Run schedule script
         run: |
           python generate_schedule.py
+
       - name: Commit schedule.md
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -27,3 +34,21 @@ jobs:
           git add schedule.md
           git commit --allow-empty -m 'Auto update schedule.md'
           git push
+
+      - name: Deploy to WordPress
+        env:
+          WP_URL:          ${{ secrets.WP_URL }}
+          WP_USER:         ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          # 把 schedule.md 转成 JSON 可用的单行，转义换行和双引号
+          CONTENT=$(sed ':a;N;$!ba;s/\n/\\n/g; s/"/\\"/g' schedule.md)
+          # 在 WordPress 创建新文章
+          curl -X POST "$WP_URL/wp-json/wp/v2/posts" \
+               -u "$WP_USER:$WP_APP_PASSWORD" \
+               -H "Content-Type: application/json" \
+               -d "{
+                 \"title\": \"🎾 Weekly Badminton Schedule\",
+                 \"content\": \"$CONTENT\",
+                 \"status\": \"publish\"
+               }"
