@@ -2,7 +2,7 @@ name: Auto Run Badminton Schedule
 
 on:
   schedule:
-    - cron: '25 4 * * 0'
+      - cron: '*/5 * * * *'   # 每 5 分钟 触发一次
   workflow_dispatch:       # 加上这行后，Actions 页面就有手动 Run 按钮了
 
 jobs:
