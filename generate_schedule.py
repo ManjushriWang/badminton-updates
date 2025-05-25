@@ -65,7 +65,7 @@ else:
     print()
 
 # 🚨 新增提醒
-print("📣 别忘了带上你的学生卡（Student ID）才能入场喔！\n")
+print("📣 Thank you for using Hiwa Badminton Manager, please don't forget to bring your student ID to entre the Hiwa recreation centre!\n")
 
 # 写 markdown 文件
 with open("schedule.md","w",encoding="utf-8") as md:
@@ -80,6 +80,6 @@ with open("schedule.md","w",encoding="utf-8") as md:
             start_t = time_str[:5]
             end_t   = e["end"].split("T")[1][:5]
             md.write(f"- **{weekday}**: {start_t} – {end_t}\n")
-    md.write("\n📣 别忘了带上你的学生卡（Student ID）才能入场喔！\n")
+    md.write("\n📣 Thank you for using Hiwa Badminton Manager, please don't forget to bring your student ID to entre the Hiwa recreation centre!\n")
 
 print("✅ schedule.md 已生成！")
