@@ -1,2 +1,2 @@
 # badminton-updates
-for ENGGEN731
+for badminton lovers at uoa
