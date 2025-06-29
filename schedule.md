@@ -1,11 +1,10 @@
 # 🎾 Member Drop-In: Badminton Sessions
-**Week:** Jun 22, 2025 – Jun 28, 2025
+**Week:** Jun 29, 2025 – Jul 05, 2025
 
-- **Monday**: 12:00 – 17:00
-- **Thursday**: 10:00 – 16:00
-- **Friday**: 06:00 – 09:00
-- **Friday**: 13:00 – 22:00
-- **Saturday**: 07:00 – 16:00
-- **Saturday**: 16:00 – 19:00
+- **Sunday**: 07:00 – 19:00
+- **Monday**: 06:00 – 14:00
+- **Wednesday**: 10:00 – 18:00
+- **Thursday**: 11:00 – 15:00
+- **Friday**: 11:00 – 16:00
 
 📣 Thank you for using Hiwa Badminton Manager, please don't forget to bring your student ID to entre the Hiwa recreation centre!
