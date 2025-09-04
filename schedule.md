@@ -6,7 +6,7 @@
 - **Tuesday**: 13:00 – 21:45
 - **Wednesday**: 18:00 – 21:45
 - **Thursday**: 07:00 – 21:00
-- **Friday**: 14:00 – 22:00
+- **Friday**: 14:00 – 21:45
 - **Saturday**: 07:00 – 18:45
 
 📣 Thank you for using Hiwa Badminton Manager, please don't forget to bring your student ID to entre the Hiwa recreation centre!
