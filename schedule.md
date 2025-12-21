@@ -1,5 +1,5 @@
 # 🎾 Member Drop-In: Badminton Sessions
-**Week:** Dec 14, 2025 – Dec 20, 2025
+**Week:** Dec 21, 2025 – Dec 27, 2025
 
 - ⚠️ 本周没有找到 Member Drop-In: Badminton 时段。
 
