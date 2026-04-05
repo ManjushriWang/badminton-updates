@@ -1,5 +1,5 @@
 # 🎾 Member Drop-In: Badminton Sessions
-**Week:** Mar 29, 2026 – Apr 04, 2026
+**Week:** Apr 05, 2026 – Apr 11, 2026
 
 - ⚠️ 本周没有找到 Member Drop-In: Badminton 时段。
 
