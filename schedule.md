@@ -1,6 +1,6 @@
 # 🎾 Member Drop-In: Badminton Sessions
-**Week:** Apr 26, 2026 – May 02, 2026
+**Week:** May 03, 2026 – May 09, 2026
 
-- ⚠️ 本周没有找到 Member Drop-In: Badminton 时段。
+- **Friday**: 06:00 – 14:30
 
 📣 Thank you for using Hiwa Badminton Manager, please don't forget to bring your student ID to entre the Hiwa recreation centre!
